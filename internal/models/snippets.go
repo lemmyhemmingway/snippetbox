@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -14,26 +15,67 @@ type Snippet struct {
 }
 
 type SnippetModel struct {
-    DB *sql.DB
+	DB *sql.DB
 }
 
-func (m *SnippetModel) Insert (title string, content string, expires int) (int, error) {
-    smt := `INSTERT INTO snippets (title, content, expires, created)
-    VALUES (?, ?, '2022-02-02', '2022-02-02')`
-    result, err := m.DB.Exec(smt, title, content, expires)
-    if err != nil {
-        return 0, err
-    }
-    id, err := result.LastInsertId()
-    if err != nil {
-        return 0, err
-    }
+func (m *SnippetModel) Insert(title string, content string, expires int) (int, error) {
+	// postgres uses $1
+	// mysql uses ?
+	sqlStatement := `
+    INSERT INTO snippets (title, content, expires, created)
+    VALUES ($1, $2, $3, $4)
+    RETURNING id`
+	id := 0
+	err := m.DB.QueryRow(sqlStatement, "first", "second", "2022-02-02", "2022-02-02").Scan(&id)
+	if err != nil {
+		panic(err)
+	}
 
-    return int(id), nil
+	return id, nil
 }
-func (m *SnippetModel) Get (id int) (*Snippet, error) {
-   return nil, nil 
+func (m *SnippetModel) Get(id int) (*Snippet, error) {
+	sqlStatement := `SELECT * FROM snippets
+    WHERE id = $1`
+
+	s := &Snippet{}
+	err := m.DB.QueryRow(sqlStatement, id).Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNoRecord
+		} else {
+			return nil, err
+		}
+	}
+
+	return s, nil
 }
 func (m *SnippetModel) Latest() ([]*Snippet, error) {
-   return nil, nil 
+	sqlStatement := `SELECT * FROM snippets
+    ORDER BY id DESC LIMIT 10`
+
+	rows, err := m.DB.Query(sqlStatement)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	snippets := []*Snippet{}
+
+	for rows.Next() {
+		s := &Snippet{}
+
+		err = rows.Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
+		if err != nil {
+			return nil, err
+		}
+		snippets = append(snippets, s)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return snippets, nil
 }
