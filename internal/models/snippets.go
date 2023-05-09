@@ -52,7 +52,7 @@ func (m *SnippetModel) Get(id int) (*Snippet, error) {
 }
 func (m *SnippetModel) Latest() ([]*Snippet, error) {
 	sqlStatement := `SELECT * FROM snippets
-    ORDER BY id DESC LIMIT 10`
+    ORDER BY id ASC LIMIT 10`
 
 	rows, err := m.DB.Query(sqlStatement)
 	if err != nil {
