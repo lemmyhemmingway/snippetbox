@@ -26,7 +26,7 @@ func (m *SnippetModel) Insert(title string, content string, expires int) (int, e
     VALUES ($1, $2, $3, $4)
     RETURNING id`
 	id := 0
-	err := m.DB.QueryRow(sqlStatement, "first", "second", "2022-02-02", "2022-02-02").Scan(&id)
+	err := m.DB.QueryRow(sqlStatement, title, content, "2022-02-02", "2022-02-02").Scan(&id)
 	if err != nil {
 		panic(err)
 	}
