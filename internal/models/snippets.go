@@ -25,8 +25,10 @@ func (m *SnippetModel) Insert(title string, content string, expires int) (int, e
     INSERT INTO snippets (title, content, expires, created)
     VALUES ($1, $2, $3, $4)
     RETURNING id`
+	now := time.Now()
+	exp := now.Add(time.Duration(expires))
 	id := 0
-	err := m.DB.QueryRow(sqlStatement, title, content, "2022-02-02", "2022-02-02").Scan(&id)
+	err := m.DB.QueryRow(sqlStatement, title, content, exp, now).Scan(&id)
 	if err != nil {
 		panic(err)
 	}
@@ -52,7 +54,7 @@ func (m *SnippetModel) Get(id int) (*Snippet, error) {
 }
 func (m *SnippetModel) Latest() ([]*Snippet, error) {
 	sqlStatement := `SELECT * FROM snippets
-    ORDER BY id ASC LIMIT 10`
+    ORDER BY id DESC LIMIT 10`
 
 	rows, err := m.DB.Query(sqlStatement)
 	if err != nil {
