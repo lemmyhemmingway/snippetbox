@@ -1,6 +1,17 @@
 {{ define "nav" }}
 <nav>
+    <div>
     <a href="/">Home</a>
     <a href="/snippet/create">Create Snippet</a>
+    </div>
+    <div>
+        
+    <a href="user/signup">Signup</a>
+    <a href="user/login">login</a>
+    <form method="post" action="user/logout">
+        <button type="button">logout</button>
+        
+    </form>
+    </div>
 </nav>
 {{ end }}
