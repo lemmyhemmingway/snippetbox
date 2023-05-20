@@ -12,26 +12,26 @@ import (
 
 func TestPing(t *testing.T) {
 
-    rr := httptest.NewRecorder()
+	rr := httptest.NewRecorder()
 
-    r, err := http.NewRequest(http.MethodGet, "/", nil)
-    if err != nil {
-        t.Fatal(err)
-    }
+	r, err := http.NewRequest(http.MethodGet, "/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    ping(rr, r)
+	ping(rr, r)
 
-    rs := rr.Result()
+	rs := rr.Result()
 
-    assert.Equal(t, rs.StatusCode, http.StatusOK)
+	assert.Equal(t, rs.StatusCode, http.StatusOK)
 
-    defer rs.Body.Close()
+	defer rs.Body.Close()
 
-    body, err := io.ReadAll(rs.Body)
-    if err != nil {
-        t.Fatal(err)
-    }
+	body, err := io.ReadAll(rs.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    bytes.TrimSpace(body)
-    assert.Equal(t, string(body), "OK")
+	bytes.TrimSpace(body)
+	assert.Equal(t, string(body), "OK")
 }
