@@ -5,4 +5,7 @@ clean:
 run: 
 	go run ./cmd/web
 
-all: clean run
+test:
+	go test -v ./cmd/web
+
+all: clean test run
