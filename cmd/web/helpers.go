@@ -30,7 +30,11 @@ func (app *application) decodePostForm(r *http.Request, dst any) error {
 	return nil
 }
 func (app *application) isAuthenticated(r *http.Request) bool {
-	return app.sessionManager.Exists(r.Context(), "auth_id")
+	isAuthenticated, ok := r.Context().Value(isAuthenticatedContextKey).(bool)
+	if !ok {
+		return false
+	}
+	return isAuthenticated
 }
 
 func (app *application) serverError(w http.ResponseWriter, err error) {
